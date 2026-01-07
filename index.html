@@ -43,15 +43,22 @@
     <aside class="inspector">
         <div id="inspector-ui" class="hidden">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                <h3>Programación 3D</h3>
+                <h3>Scripts 3D</h3>
                 <div style="position:relative">
                     <button class="add-block-btn" onclick="toggleBlocks()">+</button>
                     <div id="blockMenu" class="dropdown-content">
+                        <div style="background:#222; color:#aaa; padding:5px; font-size:9px;">ESTRUCTURAS</div>
                         <div onclick="insertBlock('Loop\n\nEnd')">🔄 Loop</div>
                         <div onclick="insertBlock('if key w\n\nend')">⌨️ Tecla W</div>
+                        <div style="background:#222; color:#aaa; padding:5px; font-size:9px;">MOVIMIENTO</div>
+                        <div onclick="insertBlock('move x 0.1')">➡️ Mover X (Derecha)</div>
+                        <div onclick="insertBlock('move x -0.1')">⬅️ Mover X (Izquierda)</div>
+                        <div onclick="insertBlock('move y 0.1')">⬆️ Mover Y (Arriba)</div>
+                        <div onclick="insertBlock('move y -0.1')">⬇️ Mover Y (Abajo)</div>
+                        <div onclick="insertBlock('move z 0.1')">🟦 Mover Z (Frente)</div>
+                        <div onclick="insertBlock('move z -0.1')">⬛ Mover Z (Atrás)</div>
+                        <div style="background:#222; color:#aaa; padding:5px; font-size:9px;">FÍSICAS</div>
                         <div onclick="insertBlock('gravity on')">🍎 Gravedad</div>
-                        <div onclick="insertBlock('move x 0.1')">➡️ Mover X</div>
-                        <div onclick="insertBlock('move y 0.1')">⬆️ Mover Y</div>
                         <div onclick="insertBlock('rotate y 0.05')">🔄 Rotar Y</div>
                     </div>
                 </div>
@@ -78,7 +85,7 @@ function init() {
     scene = new THREE.Scene(); scene.background = new THREE.Color(0x111111);
     const vp = document.getElementById('viewport');
     camera = new THREE.PerspectiveCamera(75, vp.clientWidth/vp.clientHeight, 0.1, 1000);
-    camera.position.set(5, 5, 10);
+    camera.position.set(10, 10, 10); camera.lookAt(0,0,0);
     renderer = new THREE.WebGLRenderer({ antialias: true }); renderer.setSize(vp.clientWidth, vp.clientHeight);
     vp.appendChild(renderer.domElement);
     transform = new TransformControls(camera, renderer.domElement); scene.add(transform);
@@ -108,11 +115,11 @@ window.applyScript = () => {
     selectedObject.userData.hasGravity = false;
     lines.forEach(l => {
         l = l.trim();
-        if(l === "loop") js += "/* loop */ ";
+        if(l === "loop") js += "";
         if(l === "gravity on") selectedObject.userData.hasGravity = true;
         else if(l.startsWith("if key")) js += `if(window.gameKeys['${l.split(' ')[2]}']){ `;
-        else if(l.startsWith("move")) js += `this.position.${l.split(' ')[1]} += ${l.split(' ')[2]}; `;
-        else if(l.startsWith("rotate")) js += `this.rotation.${l.split(' ')[1]} += ${l.split(' ')[2]}; `;
+        else if(l.startsWith("move")) js += `this.position.${l.split(' ')[1]} += ${parseFloat(l.split(' ')[2])}; `;
+        else if(l.startsWith("rotate")) js += `this.rotation.${l.split(' ')[1]} += ${parseFloat(l.split(' ')[2])}; `;
         else if(l === "end") js += "} ";
     });
     selectedObject.userData.compiled = js; selectedObject.userData.raw = document.getElementById('obj-script').value;
@@ -122,10 +129,10 @@ window.togglePlayMode = () => {
     isPlaying = !isPlaying;
     const btn = document.getElementById('btn-play');
     if(isPlaying) {
-        objects.forEach(o => { o.userData.sP = o.position.clone(); o.userData.vel = new THREE.Vector3(0,0,0); });
+        objects.forEach(o => { o.userData.sP = o.position.clone(); o.userData.sR = o.rotation.clone(); o.userData.vel = new THREE.Vector3(0,0,0); });
         btn.innerText = "■ STOP"; deselect();
     } else {
-        objects.forEach(o => o.position.copy(o.userData.sP));
+        objects.forEach(o => { o.position.copy(o.userData.sP); o.rotation.copy(o.userData.sR); });
         btn.innerText = "▶ PLAY";
     }
 };
