@@ -13,13 +13,10 @@
         .btn { padding: 8px; cursor: pointer; background: #444; color: white; border: 1px solid #666; font-size: 10px; font-weight: bold; text-align: center; border-radius: 3px; }
         .play-btn { background: #2e7d32; padding: 5px 20px; font-size: 12px; }
         .play-btn.playing { background: #c62828; }
-        .export-btn { background: #673ab7; color: white; border: 1px solid #512da8; font-size: 11px; margin-left: auto; }
-        
-        .prog-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
-        .add-block-btn { background: #0078d7; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; font-size: 18px; }
-        textarea { width: 93%; height: 200px; background: #000; color: #0f0; font-family: 'Consolas', monospace; padding: 10px; border: 1px solid #555; font-size: 13px; resize: none; }
-        
-        .dropdown-content { display: none; position: absolute; right: 0; background: #333; min-width: 200px; box-shadow: 0 8px 16px rgba(0,0,0,0.5); z-index: 100; border: 1px solid #555; max-height: 400px; overflow-y: auto; }
+        .export-btn { background: #673ab7; color: white; margin-left: auto; }
+        .add-block-btn { background: #0078d7; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; font-size: 18px; line-height: 0; }
+        textarea { width: 93%; height: 250px; background: #000; color: #0f0; font-family: 'Consolas', monospace; padding: 10px; border: 1px solid #555; font-size: 13px; resize: none; outline: none; }
+        .dropdown-content { display: none; position: absolute; right: 0; background: #333; min-width: 200px; box-shadow: 0 8px 16px rgba(0,0,0,0.5); z-index: 100; border: 1px solid #555; }
         .dropdown-content div { color: white; padding: 8px 12px; cursor: pointer; font-size: 11px; border-bottom: 1px solid #444; }
         .dropdown-content div:hover { background: #444; }
         .show { display: block; }
@@ -27,7 +24,6 @@
     </style>
 </head>
 <body>
-
 <nav class="menu-bar">
     <b style="font-size: 11px;">VISTA 3D STUDIO</b>
     <div class="btn" onclick="addObj('cube')">+ CUBO</div>
@@ -35,167 +31,91 @@
     <button id="btn-play" class="play-btn btn" onclick="togglePlayMode()">▶ PLAY</button>
     <button class="btn export-btn" onclick="exportToExe()">💾 EXPORTAR EXE</button>
 </nav>
-
 <div id="main-layout">
     <aside class="toolbar">
         <div class="btn" onclick="setMode('translate')">MOVER</div>
         <div class="btn" onclick="setMode('rotate')">ROTAR</div>
-        <div class="btn" onclick="setMode('scale')">ESC</div>
+        <div class="btn" onclick="setMode('scale')">ESCALAR</div>
         <hr style="width:100%; border:0; border-top:1px solid #555;">
         <div class="btn" style="color:#ff5555;" onclick="deleteObj()">BORRAR</div>
     </aside>
-
     <div id="viewport" tabindex="1"></div>
-
     <aside class="inspector">
         <div id="inspector-ui" class="hidden">
-            <div class="prog-header">
-                <h3>Programación</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                <h3>Programación 3D</h3>
                 <div style="position:relative">
                     <button class="add-block-btn" onclick="toggleBlocks()">+</button>
                     <div id="blockMenu" class="dropdown-content">
-                        <div style="background:#444; font-weight:bold; pointer-events:none;">FÍSICAS</div>
-                        <div onclick="insertBlock('gravity on')">🍎 Activar Gravedad</div>
-                        <div onclick="insertBlock('collision on')">🧱 Activar Colisión</div>
-                        <div style="background:#444; font-weight:bold; pointer-events:none;">TECLAS</div>
+                        <div onclick="insertBlock('Loop\n\nEnd')">🔄 Loop</div>
                         <div onclick="insertBlock('if key w\n\nend')">⌨️ Tecla W</div>
-                        <div onclick="insertBlock('if key arrowup\n\nend')">⬆️ Flecha Arriba</div>
-                        <div style="background:#444; font-weight:bold; pointer-events:none;">ACCIONES</div>
+                        <div onclick="insertBlock('gravity on')">🍎 Gravedad</div>
                         <div onclick="insertBlock('move x 0.1')">➡️ Mover X</div>
-                        <div onclick="insertBlock('move y 0.2')">⬆️ Mover Y</div>
+                        <div onclick="insertBlock('move y 0.1')">⬆️ Mover Y</div>
                         <div onclick="insertBlock('rotate y 0.05')">🔄 Rotar Y</div>
                     </div>
                 </div>
             </div>
             <textarea id="obj-script" spellcheck="false"></textarea>
-            <button class="btn" onclick="applyScript()" style="width:100%; margin-top:10px; background:#0078d7;">GUARDAR CAMBIOS</button>
+            <button class="btn" onclick="applyScript()" style="width:100%; margin-top:10px; background:#0078d7; height: 35px;">GUARDAR</button>
         </div>
-        <div id="no-select" style="text-align: center; color: #666; margin-top: 50px;">Selecciona algo</div>
+        <div id="no-select" style="text-align: center; color: #666; margin-top: 50px;">Selecciona un objeto</div>
     </aside>
 </div>
 
-<script type="importmap">
-{
-    "imports": {
-        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-    }
-}
-</script>
-
+<script type="importmap"> { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } } </script>
 <script type="module">
 import * as THREE from 'three';
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
+let scene, camera, renderer, transform, raycaster, mouse, selectedObject = null, isPlaying = false;
+const objects = [], keys = {}; window.gameKeys = {};
 
-let scene, camera, renderer, transform, raycaster, mouse;
-let selectedObject = null;
-let isPlaying = false;
-const objects = [];
-const keys = {};
-window.gameKeys = {};
-
-// --- FUNCIONES DE EXPORTACIÓN ---
-window.exportToExe = () => {
-    const htmlContent = document.documentElement.outerHTML;
-    const blob = new Blob([htmlContent], { type: 'text/html' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'mi_juego_3d.html';
-    a.click();
-    alert("Archivo preparado. Ahora usa un conversor 'HTML to EXE' para terminar.");
-};
-
-// --- RESTO DEL MOTOR ---
+window.exportToExe = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([document.documentElement.outerHTML], {type:'text/html'})); a.download='juego_3d.html'; a.click(); };
 window.toggleBlocks = () => document.getElementById("blockMenu").classList.toggle("show");
-window.insertBlock = (text) => {
-    const area = document.getElementById('obj-script');
-    area.setRangeText(text + "\n", area.selectionStart, area.selectionEnd, 'end');
-    area.focus();
-    toggleBlocks();
-};
+window.insertBlock = (t) => { const a = document.getElementById('obj-script'); a.setRangeText(t + "\n", a.selectionStart, a.selectionEnd, 'end'); toggleBlocks(); };
 
 function init() {
-    scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x111111);
+    scene = new THREE.Scene(); scene.background = new THREE.Color(0x111111);
     const vp = document.getElementById('viewport');
-    camera = new THREE.PerspectiveCamera(75, vp.clientWidth / vp.clientHeight, 0.1, 1000);
-    camera.position.set(10, 10, 10);
-    camera.rotation.order = 'YXZ';
-
-    renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(vp.clientWidth, vp.clientHeight);
+    camera = new THREE.PerspectiveCamera(75, vp.clientWidth/vp.clientHeight, 0.1, 1000);
+    camera.position.set(5, 5, 10);
+    renderer = new THREE.WebGLRenderer({ antialias: true }); renderer.setSize(vp.clientWidth, vp.clientHeight);
     vp.appendChild(renderer.domElement);
-
-    transform = new TransformControls(camera, renderer.domElement);
-    scene.add(transform);
-    raycaster = new THREE.Raycaster();
-    mouse = new THREE.Vector2();
-
-    window.addEventListener('keydown', (e) => { 
-        keys[e.code] = true; 
-        window.gameKeys[e.key.toLowerCase()] = true; 
-    });
-    window.addEventListener('keyup', (e) => { 
-        keys[e.code] = false; 
-        window.gameKeys[e.key.toLowerCase()] = false; 
-    });
-
-    vp.addEventListener('mousedown', (e) => {
-        const rect = renderer.domElement.getBoundingClientRect();
-        mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-        mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+    transform = new TransformControls(camera, renderer.domElement); scene.add(transform);
+    raycaster = new THREE.Raycaster(); mouse = new THREE.Vector2();
+    window.addEventListener('keydown', e => { keys[e.code] = true; window.gameKeys[e.key.toLowerCase()] = true; });
+    window.addEventListener('keyup', e => { keys[e.code] = false; window.gameKeys[e.key.toLowerCase()] = false; });
+    vp.addEventListener('mousedown', e => {
+        const r = renderer.domElement.getBoundingClientRect();
+        mouse.x = ((e.clientX - r.left) / r.width) * 2 - 1; mouse.y = -((e.clientY - r.top) / r.height) * 2 + 1;
         raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects(objects);
-        if (isPlaying && intersects.length > 0) window.lastClickedId = intersects[0].object.id;
-        else if (!isPlaying && !transform.dragging) {
-            if (intersects.length > 0) select(intersects[0].object); else deselect();
-        }
+        const ints = raycaster.intersectObjects(objects);
+        if (!isPlaying && !transform.dragging) { if (ints.length > 0) select(ints[0].object); else deselect(); }
     });
-
-    let pitch = 0, yaw = 0;
-    vp.addEventListener('contextmenu', e => e.preventDefault());
-    window.addEventListener('mousemove', (e) => {
-        if (e.buttons === 2) { 
-            yaw -= e.movementX * 0.003; pitch -= e.movementY * 0.003;
-            pitch = Math.max(-Math.PI/2, Math.min(Math.PI/2, pitch));
-            camera.rotation.set(pitch, yaw, 0, 'YXZ');
-        }
-    });
-
-    scene.add(new THREE.GridHelper(50, 50, 0x333333, 0x222222));
-    scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+    scene.add(new THREE.GridHelper(50, 50, 0x444444)); scene.add(new THREE.AmbientLight(0xffffff, 1));
     animate();
 }
 
 window.addObj = (type) => {
-    let geo = type === 'cube' ? new THREE.BoxGeometry(2,2,2) : new THREE.SphereGeometry(1.2, 32, 32);
+    const geo = type === 'cube' ? new THREE.BoxGeometry(2,2,2) : new THREE.SphereGeometry(1.2, 32, 32);
     const mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: Math.random() * 0xffffff }));
-    mesh.position.y = 1; scene.add(mesh); objects.push(mesh); select(mesh);
+    scene.add(mesh); objects.push(mesh); select(mesh);
 };
 
 window.applyScript = () => {
     if(!selectedObject) return;
-    let lines = document.getElementById('obj-script').value.toLowerCase().split('\n');
-    let js = "";
+    let lines = document.getElementById('obj-script').value.toLowerCase().split('\n'), js = "";
     selectedObject.userData.hasGravity = false;
-    lines.forEach(line => {
-        let l = line.trim();
+    lines.forEach(l => {
+        l = l.trim();
+        if(l === "loop") js += "/* loop */ ";
         if(l === "gravity on") selectedObject.userData.hasGravity = true;
-        else if(l.startsWith("if key")) {
-            let k = l.split(' ')[2];
-            js += `if(window.gameKeys['${k}']){ `;
-        }
-        else if(l.startsWith("move")) {
-            let p = l.split(' '); 
-            js += `this.position.${p[1]} += ${p[2]}; if(this.userData.vel && '${p[1]}' === 'y') this.userData.vel.y = 0; `;
-        }
-        else if(l.startsWith("rotate")) {
-            let p = l.split(' '); js += `this.rotation.${p[1]} += ${p[2]}; `;
-        }
+        else if(l.startsWith("if key")) js += `if(window.gameKeys['${l.split(' ')[2]}']){ `;
+        else if(l.startsWith("move")) js += `this.position.${l.split(' ')[1]} += ${l.split(' ')[2]}; `;
+        else if(l.startsWith("rotate")) js += `this.rotation.${l.split(' ')[1]} += ${l.split(' ')[2]}; `;
         else if(l === "end") js += "} ";
     });
-    selectedObject.userData.compiled = js;
-    selectedObject.userData.raw = document.getElementById('obj-script').value;
+    selectedObject.userData.compiled = js; selectedObject.userData.raw = document.getElementById('obj-script').value;
 };
 
 window.togglePlayMode = () => {
@@ -203,41 +123,28 @@ window.togglePlayMode = () => {
     const btn = document.getElementById('btn-play');
     if(isPlaying) {
         objects.forEach(o => { o.userData.sP = o.position.clone(); o.userData.vel = new THREE.Vector3(0,0,0); });
-        btn.innerText = "■ STOP"; btn.classList.add('playing'); deselect();
+        btn.innerText = "■ STOP"; deselect();
     } else {
         objects.forEach(o => o.position.copy(o.userData.sP));
-        btn.innerText = "▶ PLAY"; btn.classList.remove('playing');
+        btn.innerText = "▶ PLAY";
     }
 };
 
 function animate() {
     requestAnimationFrame(animate);
-    const dir = new THREE.Vector3(); camera.getWorldDirection(dir);
-    const right = new THREE.Vector3().crossVectors(camera.up, dir).multiplyScalar(-1);
-    
-    if (!isPlaying) {
-        if (keys['ArrowUp']) camera.position.addScaledVector(dir, 0.4);
-        if (keys['ArrowDown']) camera.position.addScaledVector(dir, -0.4);
-        if (keys['ArrowLeft']) camera.position.addScaledVector(right, -0.4);
-        if (keys['ArrowRight']) camera.position.addScaledVector(right, 0.4);
-    } else {
-        objects.forEach(obj => {
-            if(obj.userData.hasGravity) {
-                obj.userData.vel.y -= 0.01; obj.position.add(obj.userData.vel);
-                if(obj.position.y < 1) { obj.position.y = 1; obj.userData.vel.y = 0; }
-            }
-            if(obj.userData.compiled) { try { new Function(obj.userData.compiled).call(obj); } catch(e){} }
+    if(isPlaying) {
+        objects.forEach(o => {
+            if(o.userData.hasGravity) { o.userData.vel.y -= 0.01; o.position.add(o.userData.vel); if(o.position.y < 0) { o.position.y = 0; o.userData.vel.y = 0; } }
+            if(o.userData.compiled) { try { new Function(o.userData.compiled).call(o); } catch(e){} }
         });
     }
     renderer.render(scene, camera);
 }
-
 window.setMode = (m) => transform.setMode(m);
 window.deleteObj = () => { if(selectedObject) { scene.remove(selectedObject); objects.splice(objects.indexOf(selectedObject), 1); deselect(); }};
-function select(obj) { selectedObject = obj; transform.attach(obj); document.getElementById('inspector-ui').classList.remove('hidden'); document.getElementById('no-select').classList.add('hidden'); document.getElementById('obj-script').value = obj.userData.raw || ""; }
+function select(o) { selectedObject = o; transform.attach(o); document.getElementById('inspector-ui').classList.remove('hidden'); document.getElementById('no-select').classList.add('hidden'); document.getElementById('obj-script').value = o.userData.raw || ""; }
 function deselect() { selectedObject = null; transform.detach(); document.getElementById('inspector-ui').classList.add('hidden'); document.getElementById('no-select').classList.remove('hidden'); }
 init();
 </script>
 </body>
-
 </html>
